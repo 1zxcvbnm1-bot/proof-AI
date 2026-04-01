@@ -1,0 +1,39 @@
+# ── RAG Engine — Python dependencies ────────────────────────────────────────
+# Core
+google-genai>=1.0.0
+numpy>=1.26.0
+fastapi>=0.115.0
+uvicorn[standard]>=0.32.0
+pydantic>=2.9.0
+
+# Vector DB (choose one)
+# psycopg2-binary>=2.9.9        # for pgvector + Postgres
+# pgvector>=0.3.2
+# pinecone-client>=4.0.0        # alternative
+
+# RAG orchestration
+llama-index-core>=0.11.0
+llama-index-embeddings-openai>=0.2.0
+
+# NLI / Fact-checking
+# transformers>=4.44.0          # for DeBERTa-v3 NLI locally
+# torch>=2.4.0
+# sentence-transformers>=3.1.0
+
+# Privacy / PII
+presidio-analyzer>=2.2.35
+presidio-anonymizer>=2.2.35
+spacy>=3.7.0
+# python -m spacy download en_core_web_lg
+
+# Live web retrieval (choose one)
+# tavily-python>=0.3.3
+# google-search-results>=2.4.2
+
+# Security & Key management
+# hvac>=2.3.0                   # HashiCorp Vault client
+# boto3>=1.35.0                 # AWS KMS
+
+# Observability
+# opentelemetry-sdk>=1.27.0
+# prometheus-client>=0.21.0

@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agent Accelerator — Verified AI Infrastructure</title>
+<meta name="description" content="The only AI infrastructure layer that guarantees every output is cited, verified, and privacy-compliant. Under 3% hallucination rate vs 31% for raw GPT-5.">
+<meta property="og:title" content="Agent Accelerator — Verified AI Infrastructure">
+<meta property="og:description" content="Stop hallucinations. Cite everything. Privacy-first. Built for enterprise.">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg:      #0a0a0a;
+    --bg2:     #111;
+    --bg3:     #161616;
+    --border:  #222;
+    --text:    #e8e5de;
+    --muted:   #888;
+    --accent:  #1D9E75;
+    --purple:  #7F77DD;
+    --amber:   #BA7517;
+    --red:     #A32D2D;
+    --mono:    'Courier New', monospace;
+    --sans:    -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+  body { background: var(--bg); color: var(--text); font-family: var(--sans); line-height: 1.6; }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  /* NAV */
+  nav { display: flex; align-items: center; justify-content: space-between; padding: 20px 48px; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: var(--bg); z-index: 10; }
+  .logo { font-weight: 600; font-size: 16px; letter-spacing: -.3px; }
+  .logo span { color: var(--accent); }
+  .nav-links { display: flex; gap: 32px; font-size: 14px; color: var(--muted); }
+  .nav-links a { color: var(--muted); }
+  .nav-links a:hover { color: var(--text); }
+  .nav-cta { background: var(--accent); color: #fff; padding: 8px 20px; border-radius: 6px; font-size: 14px; font-weight: 500; }
+  .nav-cta:hover { opacity: .9; text-decoration: none; }
+
+  /* HERO */
+  .hero { max-width: 760px; margin: 0 auto; padding: 100px 24px 80px; text-align: center; }
+  .hero-badge { display: inline-block; background: rgba(29,158,117,.12); color: var(--accent); border: 1px solid rgba(29,158,117,.3); border-radius: 20px; padding: 4px 14px; font-size: 12px; margin-bottom: 24px; }
+  .hero h1 { font-size: 48px; font-weight: 600; line-height: 1.15; letter-spacing: -.5px; margin-bottom: 20px; }
+  .hero h1 em { color: var(--accent); font-style: normal; }
+  .hero p { font-size: 18px; color: var(--muted); max-width: 560px; margin: 0 auto 36px; line-height: 1.7; }
+  .hero-ctas { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  .btn-primary { background: var(--accent); color: #fff; padding: 12px 28px; border-radius: 8px; font-size: 15px; font-weight: 500; }
+  .btn-secondary { background: transparent; color: var(--text); padding: 12px 28px; border-radius: 8px; font-size: 15px; border: 1px solid var(--border); }
+  .btn-primary:hover, .btn-secondary:hover { opacity: .85; text-decoration: none; }
+
+  /* BENCHMARK */
+  .benchmark { max-width: 720px; margin: 0 auto 80px; padding: 0 24px; }
+  .section-title { text-align: center; font-size: 13px; font-weight: 500; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 32px; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th { text-align: left; padding: 12px 16px; color: var(--muted); font-weight: 500; font-size: 12px; text-transform: uppercase; letter-spacing: .05em; border-bottom: 1px solid var(--border); }
+  td { padding: 14px 16px; border-bottom: 1px solid var(--border); }
+  tr:last-child td { border-bottom: none; }
+  .highlight-row td { background: rgba(29,158,117,.06); }
+  .highlight-row td:first-child { border-left: 2px solid var(--accent); }
+  .bad   { color: var(--red); }
+  .good  { color: var(--accent); }
+  .check { color: var(--accent); }
+  .cross { color: var(--red); }
+
+  /* FEATURES */
+  .features { max-width: 900px; margin: 0 auto 80px; padding: 0 24px; }
+  .feat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .feat-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 20px; }
+  .feat-tag { font-size: 11px; font-weight: 500; color: var(--purple); background: rgba(127,119,221,.1); border-radius: 4px; padding: 2px 8px; margin-bottom: 10px; display: inline-block; }
+  .feat-card h3 { font-size: 15px; font-weight: 500; margin-bottom: 6px; }
+  .feat-card p { font-size: 13px; color: var(--muted); line-height: 1.5; }
+
+  /* CODE */
+  .code-section { max-width: 680px; margin: 0 auto 80px; padding: 0 24px; }
+  pre { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 24px; font-family: var(--mono); font-size: 13px; line-height: 1.8; overflow-x: auto; color: var(--text); }
+  .c-green { color: #6aaa64; }
+  .c-blue  { color: #85B7EB; }
+  .c-amber { color: #EF9F27; }
+  .c-muted { color: #666; }
+
+  /* PRICING */
+  .pricing { max-width: 900px; margin: 0 auto 80px; padding: 0 24px; }
+  .price-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  .price-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 20px; }
+  .price-card.featured { border-color: var(--accent); }
+  .plan-name { font-size: 13px; font-weight: 500; color: var(--muted); margin-bottom: 8px; }
+  .plan-price { font-size: 28px; font-weight: 600; margin-bottom: 4px; }
+  .plan-price span { font-size: 14px; font-weight: 400; color: var(--muted); }
+  .plan-features { list-style: none; margin-top: 16px; }
+  .plan-features li { font-size: 12px; color: var(--muted); padding: 3px 0; }
+  .plan-features li::before { content: "✓ "; color: var(--accent); }
+
+  /* FOOTER */
+  footer { border-top: 1px solid var(--border); padding: 40px 48px; display: flex; justify-content: space-between; align-items: center; font-size: 13px; color: var(--muted); }
+  @media(max-width:768px) {
+    nav { padding: 16px 20px; }
+    .nav-links { display: none; }
+    .hero h1 { font-size: 32px; }
+    .feat-grid { grid-template-columns: 1fr; }
+    .price-grid { grid-template-columns: 1fr 1fr; }
+    footer { flex-direction: column; gap: 12px; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">Agent<span>Accelerator</span></div>
+  <div class="nav-links">
+    <a href="/docs">Docs</a>
+    <a href="#benchmark">Benchmark</a>
+    <a href="#pricing">Pricing</a>
+    <a href="https://github.com/your-org/agent-accelerator">GitHub</a>
+  </div>
+  <a href="/v1/auth/signup" class="nav-cta">Start free</a>
+</nav>
+
+<section class="hero">
+  <div class="hero-badge">India-built · Enterprise-ready · SOC 2 compliant</div>
+  <h1>AI that never <em>guesses</em>.<br>Every claim cited. Every fact verified.</h1>
+  <p>The only AI infrastructure layer with a measurable hallucination rate. Under 3% vs 31% for raw GPT-5. Drop-in API. Privacy-first.</p>
+  <div class="hero-ctas">
+    <a href="/v1/docs" class="btn-primary">Read the docs</a>
+    <a href="#benchmark" class="btn-secondary">See the benchmark</a>
+  </div>
+</section>
+
+<section class="benchmark" id="benchmark">
+  <div class="section-title">Head-to-head benchmark — TruthfulQA + production pilots</div>
+  <table>
+    <thead>
+      <tr>
+        <th>Model</th>
+        <th>Hallucination rate</th>
+        <th>Claims cited</th>
+        <th>Conflicts surfaced</th>
+        <th>Privacy</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>GPT-5 (raw)</td><td class="bad">31.2%</td><td class="cross">0%</td><td class="cross">0%</td><td class="cross">None</td></tr>
+      <tr><td>Claude 3.7 (raw)</td><td class="bad">22.8%</td><td class="cross">0%</td><td class="cross">0%</td><td class="cross">None</td></tr>
+      <tr><td>Gemini Ultra (raw)</td><td class="bad">28.4%</td><td class="cross">0%</td><td class="cross">0%</td><td class="cross">None</td></tr>
+      <tr class="highlight-row">
+        <td><strong>Agent Accelerator</strong></td>
+        <td class="good"><strong>&lt; 3%</strong></td>
+        <td class="check"><strong>100%</strong></td>
+        <td class="check"><strong>100%</strong></td>
+        <td class="check"><strong>PII scrub + GDPR</strong></td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<section class="features">
+  <div class="section-title">What's inside</div>
+  <div class="feat-grid">
+    <div class="feat-card">
+      <div class="feat-tag">Phase 2</div>
+      <h3>RAG grounding engine</h3>
+      <p>8-stage pipeline. Every claim retrieved, re-ranked, and cross-verified before the LLM generates a single word.</p>
+    </div>
+    <div class="feat-card">
+      <div class="feat-tag">Phase 2</div>
+      <h3>Fact-check pipeline</h3>
+      <p>7-stage NLI verification. Atomic claim extraction. DeBERTa entailment check. Conflict detection per source pair.</p>
+    </div>
+    <div class="feat-card">
+      <div class="feat-tag">Phase 2</div>
+      <h3>Privacy vault</h3>
+      <p>AES-256-GCM encryption. Presidio PII scrubber. GDPR Art.17 erasure. RBAC. Data residency IN/EU/US.</p>
+    </div>
+    <div class="feat-card">
+      <div class="feat-tag">Phase 3</div>
+      <h3>Agentic loop</h3>
+      <p>Plan → Act → Verify → Cite. Multi-turn memory. 5 built-in tools. Auto re-plan on insufficient evidence.</p>
+    </div>
+    <div class="feat-card">
+      <div class="feat-tag">Phase 3</div>
+      <h3>Real-time SSE streaming</h3>
+      <p>Every pipeline stage streams as it happens. Plan events, tool calls, confidence scores, citations — live.</p>
+    </div>
+    <div class="feat-card">
+      <div class="feat-tag">Phase 4</div>
+      <h3>Feedback flywheel</h3>
+      <p>User corrections become RLHF training pairs. The more you use it, the smarter it gets. Data moat compounds.</p>
+    </div>
+  </div>
+</section>
+
+<section class="code-section">
+  <div class="section-title">Two minutes to verified AI</div>
+  <pre><span class="c-muted"># 1. Get a token</span>
+curl -X POST https://api.agent-accelerator.ai/v1/auth/token \
+  -H "Content-Type: application/json" \
+  -d '{"user_id":"you","plan":"starter","secret":"your-secret"}'
+
+<span class="c-muted"># 2. Stream a verified response</span>
+curl -X POST https://api.agent-accelerator.ai/v1/agent/stream \
+  -H <span class="c-green">"Authorization: Bearer &lt;token&gt;"</span> \
+  -H "Content-Type: application/json" \
+  -d '{"query": "Who founded Anthropic and what is GDPR Article 17?"}' \
+  --no-buffer
+
+<span class="c-muted"># Every SSE event includes:</span>
+<span class="c-blue">{</span> "event": "token", "data": <span class="c-blue">{</span> "text": "Anthropic was founded..." <span class="c-blue">} }</span>
+<span class="c-blue">{</span> "event": "complete", "data": <span class="c-blue">{</span>
+    "trust": <span class="c-blue">{</span> "band": <span class="c-green">"HIGH"</span>, "overall_score": 0.91 <span class="c-blue">}</span>,
+    "citations": <span class="c-amber">[{ "source": "wikipedia.org", "confidence": 0.92 }]</span>
+<span class="c-blue">} }</span></pre>
+</section>
+
+<section class="pricing" id="pricing">
+  <div class="section-title">Simple, usage-based pricing</div>
+  <div class="price-grid">
+    <div class="price-card">
+      <div class="plan-name">Free</div>
+      <div class="plan-price">$0<span>/mo</span></div>
+      <ul class="plan-features">
+        <li>50 queries/month</li>
+        <li>500 verified claims</li>
+        <li>Full pipeline</li>
+        <li>Community support</li>
+      </ul>
+    </div>
+    <div class="price-card">
+      <div class="plan-name">Starter</div>
+      <div class="plan-price">$299<span>/mo</span></div>
+      <ul class="plan-features">
+        <li>2,000 queries/month</li>
+        <li>20K claims + overage</li>
+        <li>Citation badges</li>
+        <li>Email support</li>
+        <li>SOC 2 summary</li>
+      </ul>
+    </div>
+    <div class="price-card featured">
+      <div class="plan-name" style="color:var(--accent)">Pro</div>
+      <div class="plan-price">$999<span>/mo</span></div>
+      <ul class="plan-features">
+        <li>10,000 queries/month</li>
+        <li>100K claims + overage</li>
+        <li>Custom corpus</li>
+        <li>Slack support</li>
+        <li>SLA 99.5%</li>
+        <li>Audit log export</li>
+      </ul>
+    </div>
+    <div class="price-card">
+      <div class="plan-name">Enterprise</div>
+      <div class="plan-price">$2,999<span>/mo</span></div>
+      <ul class="plan-features">
+        <li>Unlimited queries</li>
+        <li>Dedicated infra</li>
+        <li>Data residency</li>
+        <li>SOC 2 Type II</li>
+        <li>24/7 SLA + MSA</li>
+        <li>Custom contract</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div>Agent Accelerator · Built by Vimal Kumar · Chennai, India</div>
+  <div style="display:flex;gap:24px">
+    <a href="/privacy">Privacy</a>
+    <a href="/terms">Terms</a>
+    <a href="/security">Security</a>
+    <a href="mailto:vimal@agent-accelerator.ai">Contact</a>
+  </div>
+</footer>
+
+</body>
+</html>

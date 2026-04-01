@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Proof AI - Enterprise Intelligence Layer</title>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  
+  <!-- Icons -->
+  <script src="https://unpkg.com/feather-icons"></script>
+
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <div id="app-container">
+    
+    <!-- Sidebar Navigation -->
+    <nav id="sidebar">
+      <div class="logo-container">
+        <div class="logo-icon">P</div>
+        <div class="logo-text">Proof AI</div>
+      </div>
+
+      <div class="nav-section">
+        <div class="nav-section-title">Home</div>
+        <ul class="nav-list">
+          <li class="nav-item">
+            <a href="#dashboard" class="nav-link" data-target="dashboard">
+              <i data-feather="home" class="nav-icon"></i>
+              <span>Dashboard</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="#api-keys" class="nav-link" data-target="api-keys">
+              <i data-feather="key" class="nav-icon"></i>
+              <span>API Keys</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="#billing" class="nav-link" data-target="billing">
+              <i data-feather="credit-card" class="nav-icon"></i>
+              <span>Billing Engine</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <div class="nav-section">
+        <div class="nav-section-title">Core Services</div>
+        <ul class="nav-list">
+          <li class="nav-item">
+            <a href="#rag-engine" class="nav-link" data-target="rag-engine">
+              <i data-feather="database" class="nav-icon"></i>
+              <span>RAG Engine</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="#fact-checker" class="nav-link" data-target="fact-checker">
+              <i data-feather="check-circle" class="nav-icon"></i>
+              <span>Fact Checker</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="#agent-loop" class="nav-link" data-target="agent-loop">
+              <i data-feather="cpu" class="nav-icon"></i>
+              <span>Agent Loop</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="#confidence-stack" class="nav-link" data-target="confidence-stack">
+              <i data-feather="bar-chart-2" class="nav-icon"></i>
+              <span>Confidence Stack</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <div class="nav-section">
+        <div class="nav-section-title">Settings & Sec</div>
+        <ul class="nav-list">
+          <li class="nav-item">
+            <a href="#privacy-vault" class="nav-link" data-target="privacy-vault">
+              <i data-feather="shield" class="nav-icon"></i>
+              <span>Privacy Vault</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="#integrations" class="nav-link" data-target="integrations">
+              <i data-feather="zap" class="nav-icon"></i>
+              <span>Integrations</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="#docs" class="nav-link" data-target="docs">
+              <i data-feather="book-open" class="nav-icon"></i>
+              <span>Documentation</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <div class="user-profile">
+        <div class="avatar">AI</div>
+        <div class="user-info">
+          <div class="user-name">Developer Account</div>
+          <div class="user-role">Premium Workspace</div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main id="main-content">
+      <!-- Background Decorative Elements -->
+      <div class="bg-glow"></div>
+      <div class="bg-glow-2"></div>
+
+      <!-- Top Header -->
+      <header class="top-header">
+        <div class="header-title" id="current-view-title">Dashboard</div>
+        <div class="header-actions">
+          <a href="#" class="btn btn-secondary">
+            <i data-feather="help-circle" style="width: 16px; height: 16px;"></i> Support
+          </a>
+          <a href="#" class="btn btn-primary">
+            <i data-feather="book" style="width: 16px; height: 16px;"></i> View API Docs
+          </a>
+        </div>
+      </header>
+
+      <!-- Dynamic Views Container -->
+      <div class="content-wrapper">
+        
+        <!-- View: Dashboard Home -->
+        <section id="view-dashboard" class="view-section component-view">
+          <div class="page-header">
+            <h1 class="page-title">Welcome to Proof AI</h1>
+            <p class="page-description">Your enterprise intelligence layer is operational. Monitor API usage, manage services, and configure your confidence stacks below.</p>
+          </div>
+
+          <div class="stats-row">
+            <div class="stat-card">
+              <div class="stat-title">Total Requests</div>
+              <div class="stat-value">1,248,903</div>
+              <div class="stat-change positive"><i data-feather="arrow-up-right" style="width:14px;height:14px"></i> 12.5% this month</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-title">Avg Latency</div>
+              <div class="stat-value">245ms</div>
+              <div class="stat-change positive"><i data-feather="arrow-down-right" style="width:14px;height:14px"></i> 4.2% improvement</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-title">Hallucination Rejections</div>
+              <div class="stat-value">12,402</div>
+              <div class="stat-change neutral"><i data-feather="minus" style="width:14px;height:14px"></i> Stable</div>
+            </div>
+          </div>
+
+          <h2 style="margin-bottom: var(--spacing-lg);">Quick Start Services</h2>
+          <div class="grid-cards">
+            <!-- RAG Engine Card -->
+            <div class="card">
+              <div class="card-icon"><i data-feather="database"></i></div>
+              <h3 class="card-title">RAG Engine</h3>
+              <p class="card-desc">Production-ready retrieval augmented generation. Connect your data safely.</p>
+              <a href="#" class="card-action" onclick="document.querySelector('[data-target=\'rag-engine\']').click(); return false;">
+                Go to Service <i data-feather="arrow-right" style="width:16px;height:16px"></i>
+              </a>
+            </div>
+
+            <!-- Fact Checker Card -->
+            <div class="card">
+              <div class="card-icon"><i data-feather="check-circle"></i></div>
+              <h3 class="card-title">Fact Checker</h3>
+              <p class="card-desc">Verify LLM outputs against ground truth data in real-time before delivery.</p>
+              <a href="#" class="card-action" onclick="document.querySelector('[data-target=\'fact-checker\']').click(); return false;">
+                Go to Service <i data-feather="arrow-right" style="width:16px;height:16px"></i>
+              </a>
+            </div>
+
+            <!-- Agent Loop Card -->
+            <div class="card">
+              <div class="card-icon"><i data-feather="cpu"></i></div>
+              <h3 class="card-title">Agent Loop</h3>
+              <p class="card-desc">Build autonomous verification agents that self-correct and perform routing.</p>
+              <a href="#" class="card-action" onclick="document.querySelector('[data-target=\'agent-loop\']').click(); return false;">
+                Go to Service <i data-feather="arrow-right" style="width:16px;height:16px"></i>
+              </a>
+            </div>
+          </div>
+        </section>
+
+        <!-- View: API Keys -->
+        <section id="view-api-keys" class="view-section component-view">
+          <div class="page-header">
+            <h1 class="page-title">API Keys</h1>
+            <p class="page-description">Manage your API keys for authenticating requests to Proof AI services.</p>
+          </div>
+
+          <div class="data-table-container">
+            <div class="table-header-row">
+              <h3 style="font-size: 1.1rem; margin: 0;">Active Keys</h3>
+              <button class="btn btn-primary btn-sm">+ Create New Key</button>
+            </div>
+            <table>
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Key</th>
+                  <th>Status</th>
+                  <th>Created</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Production App</td>
+                  <td>
+                    <span class="api-key-cell">pk_live_8f92a...e9b1</span>
+                  </td>
+                  <td><span class="status-badge status-active">Active</span></td>
+                  <td>Mar 12, 2026</td>
+                  <td><a href="#" class="copy-btn">Copy Key</a></td>
+                </tr>
+                <tr>
+                  <td>Development Environment</td>
+                  <td>
+                    <span class="api-key-cell">pk_test_4m21x...88p2</span>
+                  </td>
+                  <td><span class="status-badge status-active">Active</span></td>
+                  <td>Mar 15, 2026</td>
+                  <td><a href="#" class="copy-btn">Copy Key</a></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- View: RAG Engine -->
+        <section id="view-rag-engine" class="view-section component-view">
+          <div class="page-header">
+            <h1 class="page-title">RAG Engine Explorer</h1>
+            <p class="page-description">Test your existing vector embeddings and connected databases.</p>
+          </div>
+
+          <div class="service-interface">
+            <div class="service-controls card">
+              <h3 style="margin-bottom:var(--spacing-md)">Test Retrieval</h3>
+              <div class="input-group">
+                <label class="input-label">Query</label>
+                <input type="text" class="input-field" placeholder="Enter query string...">
+              </div>
+              <div class="input-group">
+                <label class="input-label">Top K Results</label>
+                <input type="number" class="input-field" value="5">
+              </div>
+              <button class="btn btn-primary mock-api-btn" style="width: 100%; margin-top: var(--spacing-md);" data-service="rag" data-action="query">
+                Run Query Simulation
+              </button>
+            </div>
+
+            <div class="service-output">
+              <div class="terminal-window">
+                <div class="terminal-header">
+                  <div class="terminal-dots">
+                    <div class="dot dot-red"></div>
+                    <div class="dot dot-yellow"></div>
+                    <div class="dot dot-green"></div>
+                  </div>
+                  <div class="terminal-title">RAG Output Log</div>
+                </div>
+                <div class="terminal-body" id="rag-terminal">
+                  <div class="terminal-line"><span class="terminal-prompt">&gt;</span> Proof AI RAG Engine Initialized.</div>
+                  <div class="terminal-line"><span class="terminal-prompt">&gt;</span> Awaiting query...</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Repeated interface placeholders for other services to show structure -->
+        <section id="view-fact-checker" class="view-section component-view">
+           <div class="page-header">
+            <h1 class="page-title">Fact Checker Pipeline</h1>
+            <p class="page-description">Automated truth verification using Confidence Stack metrics.</p>
+          </div>
+           <div class="service-interface">
+            <div class="service-controls card">
+              <h3 style="margin-bottom:var(--spacing-md)">Verify Claim</h3>
+              <div class="input-group">
+                <label class="input-label">LLM Generated Claim</label>
+                <textarea class="input-field" style="height: 100px; resize: none;" placeholder="The company launched its new product in Q1 2026..."></textarea>
+              </div>
+              <button class="btn btn-primary mock-api-btn" style="width: 100%;" data-service="fact-checker" data-action="verify">
+                Run Verification
+              </button>
+            </div>
+            <div class="service-output">
+              <div class="terminal-window">
+                <div class="terminal-header">
+                  <div class="terminal-dots">
+                    <div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div>
+                  </div>
+                  <div class="terminal-title">Verification Results</div>
+                </div>
+                <div class="terminal-body">
+                  <div class="terminal-line"><span class="terminal-prompt">&gt;</span> Fact checker ready. Provide claim for verification.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Dummy Views for completion -->
+        <section id="view-billing" class="view-section component-view">
+          <div class="page-header"><h1 class="page-title">Billing Engine</h1><p class="page-description">Monitor costs and usage limits across your organization.</p></div>
+          <div class="card"><p>Current cycle usage: $1,245.80 / $5,000.00 limits</p></div>
+        </section>
+
+        <section id="view-agent-loop" class="view-section component-view">
+          <div class="page-header"><h1 class="page-title">Agent Loop Framework</h1><p class="page-description">Configure your multi-agent verification system routing using best-in-class models.</p></div>
+          <div class="grid-cards">
+            <div class="card">
+              <h3 class="card-title">Data Extractor Agent</h3>
+              <p class="card-desc">Running on <strong>Meta Llama 3 (NVIDIA NIM)</strong></p>
+              <span class="status-badge status-active">Active</span>
+            </div>
+            <div class="card">
+              <h3 class="card-title">Evaluator Agent</h3>
+              <p class="card-desc">Running on <strong>OpenAI GPT-4o</strong></p>
+              <span class="status-badge status-active">Idle</span>
+            </div>
+            <div class="card">
+              <h3 class="card-title">Router Agent</h3>
+              <p class="card-desc">Running on <strong>Anthropic Claude 3.5</strong></p>
+              <span class="status-badge status-active">Routing</span>
+            </div>
+          </div>
+        </section>
+        
+        <section id="view-confidence-stack" class="view-section component-view">
+          <div class="page-header"><h1 class="page-title">Confidence Stack</h1><p class="page-description">View threshold policies for response delivery.</p></div>
+          <div class="card"><p>Minimum confidence required for automatic delivery: 0.92</p></div>
+        </section>
+
+        <section id="view-privacy-vault" class="view-section component-view">
+          <div class="page-header"><h1 class="page-title">Privacy Vault</h1><p class="page-description">PII scrubbing and compliance configurations.</p></div>
+          <div class="card"><p>Vault is Active. Auto-scrubbing PII in prompts turned ON.</p></div>
+        </section>
+
+        <section id="view-integrations" class="view-section component-view">
+          <div class="page-header">
+            <h1 class="page-title">Enterprise Model Integrations</h1>
+            <p class="page-description">Securely route requests to industry-leading AI fleets via the Privacy Vault.</p>
+          </div>
+          <div class="grid-cards" style="grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));">
+             <div class="card" style="border-top: 3px solid #10a37f;">
+               <h3 class="card-title">OpenAI</h3>
+               <p class="card-desc">GPT-4o, GPT-4 Turbo</p>
+               <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <span class="status-badge status-active">Connected</span>
+                  <span style="font-size:0.8rem;color:var(--text-muted)">12ms latency</span>
+               </div>
+             </div>
+             <div class="card" style="border-top: 3px solid #d97757;">
+               <h3 class="card-title">Anthropic</h3>
+               <p class="card-desc">Claude 3.5 Sonnet & Opus</p>
+               <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <span class="status-badge status-active">Connected</span>
+                  <span style="font-size:0.8rem;color:var(--text-muted)">15ms latency</span>
+               </div>
+             </div>
+             <div class="card" style="border-top: 3px solid #4285f4;">
+               <h3 class="card-title">Google Cloud</h3>
+               <p class="card-desc">Gemini 1.5 Pro & Vertex AI</p>
+               <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <span class="status-badge status-active">Connected</span>
+                  <span style="font-size:0.8rem;color:var(--text-muted)">18ms latency</span>
+               </div>
+             </div>
+             <div class="card" style="border-top: 3px solid #0668E1;">
+               <h3 class="card-title">Meta</h3>
+               <p class="card-desc">Llama 3 70B & 405B</p>
+               <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <span class="status-badge status-active">Connected</span>
+                  <span style="font-size:0.8rem;color:var(--text-muted)">Local/Hosted</span>
+               </div>
+             </div>
+             <div class="card" style="border-top: 3px solid #76B900;">
+               <h3 class="card-title">NVIDIA</h3>
+               <p class="card-desc">NIM Microservices & NeMo</p>
+               <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <span class="status-badge status-active">Connected</span>
+                  <span style="font-size:0.8rem;color:var(--text-muted)">GPU Fleet</span>
+               </div>
+             </div>
+             <div class="card" style="border-top: 3px solid #F80000;">
+               <h3 class="card-title">Oracle</h3>
+               <p class="card-desc">OCI Generative AI</p>
+               <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <span class="status-badge status-active">Connected</span>
+                  <span style="font-size:0.8rem;color:var(--text-muted)">Enterprise Cloud</span>
+               </div>
+             </div>
+          </div>
+        </section>
+
+      </div>
+    </main>
+
+  </div>
+
+  <script>
+    // Initialize feather icons
+    feather.replace();
+  </script>
+  <script src="js/app.js"></script>
+</body>
+</html>

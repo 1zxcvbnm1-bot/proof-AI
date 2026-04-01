@@ -1,0 +1,33 @@
+{
+  "result_id": "7edcd9fe-8941-4bf1-a9f0-cf737992eb8d",
+  "total_claims": 1,
+  "verified": 0,
+  "uncertain": 0,
+  "blocked": 1,
+  "conflicts": 0,
+  "halluc_rate": "100.0%",
+  "overall_score": "0.00",
+  "latency_ms": "7ms",
+  "verdicts": [
+    {
+      "claim_id": "C0001_ff7d86c5",
+      "claim": "The moon is made of cheese and the government hides it from the public.",
+      "claim_type": "factual",
+      "verdict": "BLOCKED",
+      "confidence": 0.0,
+      "band": "BLOCKED",
+      "explanation": "No verified evidence found for this claim (confidence: 0.00). Agent should not assert this.",
+      "halluc_type": "parametric",
+      "sources": [],
+      "conflicts": []
+    }
+  ],
+  "stats": {
+    "corpus_size": 7,
+    "checks_processed": 3,
+    "hallucination_rate": "100.0%",
+    "average_confidence": "0.00",
+    "nli_cache_size": 25,
+    "claim_cache_size": 1
+  }
+}

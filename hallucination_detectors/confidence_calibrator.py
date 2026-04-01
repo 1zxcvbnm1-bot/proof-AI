@@ -9,8 +9,8 @@ Detects:
 Monitors the gap between claimed confidence (in language) and actual evidence quality.
 """
 
-import time
 from __future__ import annotations
+import time
 import re
 from typing import List, Optional
 

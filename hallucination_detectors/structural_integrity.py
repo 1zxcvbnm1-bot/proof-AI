@@ -9,8 +9,8 @@ Detects:
 Validates the structural correctness of relationships and sequences in claims.
 """
 
-import time
 from __future__ import annotations
+import time
 import re
 from typing import List, Optional, Tuple
 # Detectors use ClaimProtocol (duck typing)

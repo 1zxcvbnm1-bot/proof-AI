@@ -83,6 +83,8 @@ MAX_PARALLEL_RETRIEVERS = 4
 RERANKER_TOP_K          = 5
 NLI_ENTAIL_THRESHOLD    = 0.72
 TRUST_SCORE_GATE        = 0.60
+CONFIDENCE_GATE         = 0.60     # minimum for VERIFIED (same as TRUST_SCORE_GATE)
+CONFIDENCE_LOW          = 0.40     # minimum for UNCERTAIN (below = BLOCKED)
 STREAM_CHUNK_DELAY_MS   = 0         # set >0 for throttling
 
 
@@ -120,6 +122,7 @@ class VerifiedClaim:
     supporting_facts:  list[FactRecord]
     nli_score:         float
     hallucination_type: HallucinationType = HallucinationType.NONE
+    hallucination_flags: list = field(default_factory=list)  # Advanced detector flags
 
 
 @dataclass
@@ -844,12 +847,52 @@ class RAGEngine:
         self.generator    = ConstrainedGenerator(self._client, model_name)
         self.audit        = AuditLogger()
         self._corpus_size = 0
+        # Advanced hallucination detectors (lazy import to avoid circular deps)
+        try:
+            from hallucination_detectors import HallucinationDetectorAggregator
+            self.detector_aggregator = HallucinationDetectorAggregator(self._client, self._model_name)
+            self._detectors_enabled = True
+        except ImportError as e:
+            print(f"[RAGEngine] Hallucination detectors not available: {e}")
+            self.detector_aggregator = None
+            self._detectors_enabled = False
 
     def load_corpus(self, facts: list[FactRecord]) -> None:
         """Load verified fact corpus into all retrievers."""
         self.retriever = ParallelRetriever(facts)
+        self._corpus_facts = facts  # store for detector context
         self._corpus_size = len(facts)
+        # Update entity cache in hallucination detectors
+        if self._detectors_enabled and self.detector_aggregator:
+            corpus_texts = [fact.claim_text for fact in facts]
+            self.detector_aggregator.update_corpus_entities(corpus_texts)
         print(f"[RAGEngine] Corpus loaded: {self._corpus_size} verified facts")
+
+    def _apply_detector_penalties(self, confidence: float, flags: list) -> float:
+        """Apply confidence penalties based on detected hallucinations."""
+        if not flags:
+            return confidence
+
+        # Severity to penalty mapping (matches FactCheckPipeline)
+        severity_penalties = {
+            'CRITICAL': 0.40,
+            'HIGH': 0.25,
+            'MEDIUM': 0.15,
+            'LOW': 0.08,
+        }
+
+        penalty = 0.0
+        for flag in flags:
+            if hasattr(flag, 'severity') and hasattr(flag.severity, 'value'):
+                severity = flag.severity.value
+                penalty_amount = severity_penalties.get(severity, 0.10)
+                penalty += penalty_amount * 0.7  # diminishing returns
+            else:
+                penalty += 0.10
+
+        penalty = min(penalty, 0.70)
+        new_conf = max(0.0, confidence - penalty)
+        return new_conf
 
     async def query(
         self,
@@ -904,7 +947,7 @@ class RAGEngine:
             # No corpus hits — full block
             verified, conflict_found, conflict_detail = [], False, {}
 
-        # Count outcomes
+        # Count outcomes (initial)
         audit.claims_verified  = sum(1 for v in verified if v.status == ClaimStatus.VERIFIED)
         audit.claims_uncertain = sum(1 for v in verified if v.status == ClaimStatus.UNCERTAIN)
         audit.claims_blocked   = sum(1 for v in verified if v.status == ClaimStatus.BLOCKED)
@@ -912,6 +955,56 @@ class RAGEngine:
         h_types = list({v.hallucination_type.value for v in verified if v.hallucination_type != HallucinationType.NONE})
         audit.hallucination_detected = bool(h_types)
         audit.hallucination_types    = h_types
+
+        # ── Stage 6.5: Advanced Hallucination Detection (optional) ─────────────
+        detector_flags_by_claim = {}
+        if self._detectors_enabled and verified:
+            try:
+                # Create simple claim objects for detectors
+                for v in verified:
+                    class SimpleClaim:
+                        def __init__(self, text, claim_id):
+                            self.text = text
+                            self.claim_id = claim_id
+                    claim_id = v.supporting_facts[0].fact_id if v.supporting_facts else "unknown"
+                    simple_claim = SimpleClaim(v.claim_text, claim_id)
+
+                    flags = await self.detector_aggregator.detect_all(simple_claim, context={
+                        'query': clean_query,
+                        'evidence_chunks': top_chunks,
+                        'corpus_chunks': [f.claim_text for f in getattr(self, '_corpus_facts', [])],
+                    })
+                    detector_flags_by_claim[v.claim_text] = flags
+                    v.hallucination_flags = flags
+
+                # Apply detector penalties to confidence and adjust status
+                for v in verified:
+                    if v.claim_text in detector_flags_by_claim:
+                        old_conf = v.confidence
+                        v.confidence = self._apply_detector_penalties(v.confidence, detector_flags_by_claim[v.claim_text])
+                        # Re-evaluate status based on adjusted confidence
+                        if v.confidence < CONFIDENCE_LOW:  # < 0.4
+                            v.status = ClaimStatus.BLOCKED
+                        elif v.confidence < CONFIDENCE_GATE:  # < 0.6
+                            v.status = ClaimStatus.UNCERTAIN
+                        if old_conf != v.confidence:
+                            print(f"[RAGEngine] Detector adjusted confidence: {old_conf:.2f} → {v.confidence:.2f} for '{v.claim_text[:50]}...'")
+
+                # Re-count after detector adjustments
+                audit.claims_verified  = sum(1 for v in verified if v.status == ClaimStatus.VERIFIED)
+                audit.claims_uncertain = sum(1 for v in verified if v.status == ClaimStatus.UNCERTAIN)
+                audit.claims_blocked   = sum(1 for v in verified if v.status == ClaimStatus.BLOCKED)
+                audit.hallucination_types = list({
+                    flag.hallucination_type.value
+                    for v in verified
+                    for flag in v.hallucination_flags
+                })
+                audit.hallucination_detected = bool(audit.hallucination_types)
+
+            except Exception as e:
+                print(f"[RAGEngine] Hallucination detection error (continuing): {e}")
+                import traceback
+                traceback.print_exc()
 
         # Surface conflict before generation
         if conflict_found:

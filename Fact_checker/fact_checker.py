@@ -33,6 +33,9 @@ from typing import AsyncIterator, Optional, Any
 import numpy as np
 from litellm import acompletion
 
+# ── Local: Hallucination Detectors ───────────────────────────────────────────
+# Imported inside FactCheckPipeline.__init__ to avoid circular dependency at module load
+
 class UniversalAsyncMessages:
     def __init__(self, api_key):
         self.api_key = api_key
@@ -170,9 +173,10 @@ class ClaimVerdict:
     conflicts:      list[ConflictRecord]
     supporting:     list[EvidenceChunk]     # entailing sources
     blocking:       list[EvidenceChunk]     # contradicting sources
-    halluc_type:    HalluType
+    halluc_type:    HalluType               # legacy: single primary type (most severe)
     explanation:    str                     # human-readable reasoning
     latency_ms:     float = 0.0
+    hallucination_flags: list = field(default_factory=list)  # list of HallucinationFlag from advanced detectors
 
 
 @dataclass
@@ -836,8 +840,20 @@ class VerdictComposer:
         chunks:      list[EvidenceChunk],
         nli_results: list[NLIResult],
         conflicts:   list[ConflictRecord],
+        detector_flags: list = None,  # list of HallucinationFlag objects
     ) -> ClaimVerdict:
+        """
+        Compose final verdict from all verification stages.
+
+        Args:
+            detector_flags: Optional list of hallucination detection flags to incorporate
+
+        Returns:
+            ClaimVerdict with integrated hallucination assessment
+        """
         t_start = time.time()
+        if detector_flags is None:
+            detector_flags = []
 
         # Partition chunks by NLI label
         nli_map = {r.chunk_id: r for r in nli_results}
@@ -847,10 +863,15 @@ class VerdictComposer:
         has_conflict = len(conflicts) > 0
         confidence   = self._conf.compute(entailing, nli_results, has_conflict)
 
-        # Verdict decision tree
+        # Apply hallucination penalties from advanced detectors
+        confidence = self._apply_detector_penalties(confidence, detector_flags)
+
+        # Determine primary hallucination type (most severe)
+        primary_halluc_type = self._determine_primary_hallucination(has_conflict, detector_flags)
+
+        # Verdict decision tree (now considering adjusted confidence)
         if has_conflict:
             verdict    = Verdict.CONFLICT
-            halluc     = HalluType.FACTUAL_CONTRADICTION
             explanation = (
                 f"Sources disagree on this claim. "
                 f"{conflicts[0].source_a_url} vs {conflicts[0].source_b_url}. "
@@ -858,7 +879,6 @@ class VerdictComposer:
             )
         elif len(entailing) >= 2 and confidence >= CONFIDENCE_GATE:
             verdict    = Verdict.VERIFIED
-            halluc     = HalluType.NONE
             explanation = (
                 f"Verified by {len(entailing)} independent sources "
                 f"(confidence: {confidence:.2f}). "
@@ -866,26 +886,32 @@ class VerdictComposer:
             )
         elif len(entailing) >= 1 and confidence >= CONFIDENCE_LOW:
             verdict    = Verdict.UNCERTAIN
-            halluc     = HalluType.NONE
             explanation = (
                 f"Only {len(entailing)} source supports this claim "
                 f"(confidence: {confidence:.2f}). Treat with caution."
             )
         elif contradicting:
             verdict    = Verdict.BLOCKED
-            halluc     = HalluType.FACTUAL_CONTRADICTION
             explanation = (
                 f"{len(contradicting)} source(s) contradict this claim. "
                 f"Claim suppressed."
             )
         else:
             verdict    = Verdict.BLOCKED
-            halluc     = HalluType.FACTUAL_CONTRADICTION
             explanation = (
                 f"No verified evidence found for this claim "
                 f"(confidence: {confidence:.2f}). "
                 f"Agent should not assert this."
             )
+
+        # Determine halluc_type for audit (use primary unless conflict overrides)
+        if has_conflict:
+            halluc_type = HalluType.FACTUAL_CONTRADICTION
+        elif verdict == Verdict.BLOCKED and detector_flags:
+            # If blocked due to detector findings, use most severe detector type
+            halluc_type = primary_halluc_type or HalluType.FACTUAL_CONTRADICTION
+        else:
+            halluc_type = HalluType.NONE if verdict in [Verdict.VERIFIED, Verdict.UNCERTAIN] else (primary_halluc_type or HalluType.FACTUAL_CONTRADICTION)
 
         return ClaimVerdict(
             claim=claim,
@@ -895,10 +921,65 @@ class VerdictComposer:
             conflicts=conflicts,
             supporting=entailing,
             blocking=contradicting,
-            halluc_type=halluc,
+            halluc_type=halluc_type,
+            hallucination_flags=detector_flags,
             explanation=explanation,
             latency_ms=(time.time() - t_start) * 1000,
         )
+
+    def _apply_detector_penalties(self, confidence: float, flags: list) -> float:
+        """Apply confidence penalties based on detected hallucinations."""
+        if not flags:
+            return confidence
+
+        # Severity to penalty mapping (tunable)
+        severity_penalties = {
+            'CRITICAL': 0.40,
+            'HIGH': 0.25,
+            'MEDIUM': 0.15,
+            'LOW': 0.08,
+        }
+
+        penalty = 0.0
+        for flag in flags:
+            if hasattr(flag, 'severity') and hasattr(flag.severity, 'value'):
+                severity = flag.severity.value
+                penalty_amount = severity_penalties.get(severity, 0.10)
+                # Apply diminishing returns for multiple flags of same severity
+                penalty += penalty_amount * 0.7  # each additional flag counts 70%
+            else:
+                penalty += 0.10  # default
+
+        # Cap penalty at 0.7 so confidence never goes completely to 0 if some evidence exists
+        penalty = min(penalty, 0.70)
+        new_conf = max(0.0, confidence - penalty)
+        return new_conf
+
+    def _determine_primary_hallucination(self, has_conflict: bool, flags: list) -> Optional[HalluType]:
+        """Determine the most severe hallucination type from flags."""
+        if has_conflict:
+            return HalluType.FACTUAL_CONTRADICTION
+
+        if not flags:
+            return None
+
+        # Order by severity
+        severity_order = ['CRITICAL', 'HIGH', 'MEDIUM', 'LOW']
+        hallu_type = None
+        min_severity_idx = 999
+
+        for flag in flags:
+            if hasattr(flag, 'hallucination_type') and hasattr(flag, 'severity'):
+                severity = flag.severity.value
+                try:
+                    idx = severity_order.index(severity)
+                    if idx < min_severity_idx:
+                        min_severity_idx = idx
+                        hallu_type = flag.hallucination_type
+                except (ValueError, AttributeError):
+                    continue
+
+        return hallu_type
 
 
 # ════════════════════════════════════════════════════════════════════════════
@@ -997,17 +1078,34 @@ class FactCheckPipeline:
         self.composer  = VerdictComposer(self.conf_eng)
         self.audit     = FactCheckAuditLogger()
         self._corpus_size = 0
+        # Advanced hallucination detectors (lazy import to avoid circular deps at module load)
+        from hallucination_detectors import HallucinationDetectorAggregator
+        self.detector_aggregator = HallucinationDetectorAggregator(self._client, self._model_name)
 
     def load_corpus(self, chunks: list[KnowledgeChunk]) -> None:
         """Load knowledge corpus into all retrievers."""
         self.hunter.update_corpus(chunks)
         self._corpus_size = len(chunks)
+        # Update entity cache in detectors
+        self.detector_aggregator.update_corpus_entities([chunk.text for chunk in chunks])
         print(f"[FactCheckPipeline] Corpus loaded: {self._corpus_size} chunks")
 
-    async def _process_claim(self, claim: AtomicClaim) -> ClaimVerdict:
+    async def _process_claim(self, claim: AtomicClaim, input_text: str = "") -> ClaimVerdict:
         """Run stages 2–6 for a single claim. Fully async."""
         # S2: Evidence
         chunks = await self.hunter.hunt(claim)
+
+        # S2.5: Advanced Hallucination Detection (needs evidence and query context)
+        detector_flags = []
+        try:
+            detector_flags = await self.detector_aggregator.detect_all(claim, context={
+                'query': input_text,
+                'evidence_chunks': chunks,
+                'corpus_chunks': self.hunter._corpus if hasattr(self.hunter, '_corpus') else [],
+            })
+        except Exception as e:
+            # Log but don't fail pipeline if detectors error
+            print(f"[HallucinationDetector] Error: {e}")
 
         # S3: NLI — all pairs in parallel
         nli_results = await self.nli.verify_claim(claim, chunks)
@@ -1015,8 +1113,10 @@ class FactCheckPipeline:
         # S4: Conflict — pairwise, parallel
         conflicts = await self.conflict.analyze(claim, chunks)
 
-        # S5+S6: Confidence + Verdict
-        verdict = self.composer.compose(claim, chunks, nli_results, conflicts)
+        # S5+S6: Confidence + Verdict (with detector flags)
+        verdict = self.composer.compose(claim, chunks, nli_results, conflicts, detector_flags)
+        # Attach flags to verdict for audit
+        verdict.hallucination_flags = detector_flags
         return verdict
 
     def _fail_stage_0(self, result: FactCheckResult, text: str, h_type: HalluType, reason: str, t_start: float) -> FactCheckResult:
@@ -1069,7 +1169,7 @@ class FactCheckPipeline:
 
         # S2–S6: Process ALL claims in parallel
         verdicts: list[ClaimVerdict] = list(
-            await asyncio.gather(*[self._process_claim(c) for c in claims])
+            await asyncio.gather(*[self._process_claim(c, input_text=text) for c in claims])
         )
 
         result.verdicts = verdicts
@@ -1153,7 +1253,7 @@ class FactCheckPipeline:
         )
 
         tasks = {
-            asyncio.ensure_future(self._process_claim(claim)): claim
+            asyncio.ensure_future(self._process_claim(claim, input_text=text)): claim
             for claim in claims
         }
 
@@ -1179,6 +1279,7 @@ class FactCheckPipeline:
                             "band":        self.conf_eng.band(verdict.confidence),
                             "explanation": verdict.explanation,
                             "halluc_type": verdict.halluc_type.value,
+                            "hallucination_flags": [f.hallucination_type.value for f in verdict.hallucination_flags],
                             "sources":     [c.source_url for c in verdict.supporting[:3]],
                             "conflicts":   len(verdict.conflicts),
                             "latency_ms":  round(verdict.latency_ms, 1),

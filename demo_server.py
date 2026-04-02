@@ -293,7 +293,8 @@ if __name__ == "__main__":
     print("=" * 70)
     print(f"  Starting server on http://localhost:8080")
     print(f"  Serving SPA from: {os.path.join(BASE_DIR, 'Website')}")
-    print(f"  PROOF-AI modules: {'✅ Available' if PROOF_AI_AVAILABLE else '❌ Not found'}")
+    status = "Available" if PROOF_AI_AVAILABLE else "Not found"
+    print(f"  PROOF-AI modules: {status}")
     print("=" * 70)
 
     uvicorn.run(app, host="0.0.0.0", port=8080)

@@ -288,13 +288,15 @@ app.mount("/js", StaticFiles(directory=os.path.join(BASE_DIR, "Website", "js")),
 
 if __name__ == "__main__":
     import uvicorn
+    # Render compatibility: use PORT env var if provided, else 8080
+    port = int(os.environ.get('PORT', 8080))
     print("=" * 70)
     print("  PROOF-AI LIVE DEMO SERVER")
     print("=" * 70)
-    print(f"  Starting server on http://localhost:8080")
+    print(f"  Starting server on http://0.0.0.0:{port}")
     print(f"  Serving SPA from: {os.path.join(BASE_DIR, 'Website')}")
     status = "Available" if PROOF_AI_AVAILABLE else "Not found"
     print(f"  PROOF-AI modules: {status}")
     print("=" * 70)
 
-    uvicorn.run(app, host="0.0.0.0", port=8080)
+    uvicorn.run(app, host="0.0.0.0", port=port)

@@ -1,5 +1,5 @@
 {
-  "timestamp": 1775061975.946694,
+  "timestamp": 1775062195.1160336,
   "detection_rate": 100.0,
   "total_tests": 10,
   "caught": 10,
@@ -13,7 +13,7 @@
       "types": [
         "sentence_contradiction"
       ],
-      "latency_ms": 943.3553218841553
+      "latency_ms": 729.0995121002197
     },
     {
       "id": "HAL-002",
@@ -24,7 +24,7 @@
       "types": [
         "sentence_contradiction"
       ],
-      "latency_ms": 199.6767520904541
+      "latency_ms": 240.4036521911621
     },
     {
       "id": "HAL-003",
@@ -35,7 +35,7 @@
       "types": [
         "sentence_contradiction"
       ],
-      "latency_ms": 188.85397911071777
+      "latency_ms": 259.69648361206055
     },
     {
       "id": "HAL-004",
@@ -46,7 +46,7 @@
       "types": [
         "sentence_contradiction"
       ],
-      "latency_ms": 207.87835121154785
+      "latency_ms": 255.83243370056152
     },
     {
       "id": "HAL-005",
@@ -57,7 +57,7 @@
       "types": [
         "sentence_contradiction"
       ],
-      "latency_ms": 204.62822914123535
+      "latency_ms": 240.26942253112793
     },
     {
       "id": "HAL-006",
@@ -68,7 +68,7 @@
       "types": [
         "sentence_contradiction"
       ],
-      "latency_ms": 323.4741687774658
+      "latency_ms": 258.6352825164795
     },
     {
       "id": "HAL-007",
@@ -79,7 +79,7 @@
       "types": [
         "sentence_contradiction"
       ],
-      "latency_ms": 197.4489688873291
+      "latency_ms": 236.9515895843506
     },
     {
       "id": "HAL-008",
@@ -90,7 +90,7 @@
       "types": [
         "sentence_contradiction"
       ],
-      "latency_ms": 192.19398498535156
+      "latency_ms": 287.52732276916504
     },
     {
       "id": "HAL-009",
@@ -101,7 +101,7 @@
       "types": [
         "sentence_contradiction"
       ],
-      "latency_ms": 392.8375244140625
+      "latency_ms": 338.49644660949707
     },
     {
       "id": "HAL-010",
@@ -112,7 +112,7 @@
       "types": [
         "sentence_contradiction"
       ],
-      "latency_ms": 181.46014213562012
+      "latency_ms": 273.00310134887695
     }
   ]
 }

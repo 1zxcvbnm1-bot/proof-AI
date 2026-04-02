@@ -287,17 +287,36 @@
         <section id="view-fact-checker" class="view-section component-view">
            <div class="page-header">
             <h1 class="page-title">Fact Checker Pipeline</h1>
-            <p class="page-description">Automated truth verification using Confidence Stack metrics.</p>
+            <p class="page-description">Automated truth verification using Confidence Stack metrics. Enter your AI API key to test live.</p>
           </div>
            <div class="service-interface">
             <div class="service-controls card">
-              <h3 style="margin-bottom:var(--spacing-md)">Verify Claim</h3>
+              <h3 style="margin-bottom:var(--spacing-md)">API Configuration</h3>
+              <div class="input-group">
+                <label class="input-label">AI Provider</label>
+                <select class="input-field" id="factcheck-provider">
+                  <option value="groq">Groq (Llama 3.3 70B)</option>
+                  <option value="anthropic">Anthropic (Claude 3.5 Sonnet)</option>
+                  <option value="openai">OpenAI (GPT-4o)</option>
+                  <option value="together">Together (Llama 2 70B)</option>
+                </select>
+              </div>
+              <div class="input-group">
+                <label class="input-label">API Key</label>
+                <input type="password" class="input-field" id="factcheck-apikey" placeholder="Enter your API key (sk-..., gsk_..., etc.)">
+              </div>
+              <div class="input-group">
+                <label class="input-label">Model (optional)</label>
+                <input type="text" class="input-field" id="factcheck-model" placeholder="Override default model">
+              </div>
+
+              <h3 style="margin-bottom:var(--spacing-md); margin-top: 24px;">Verify Claim</h3>
               <div class="input-group">
                 <label class="input-label">LLM Generated Claim</label>
-                <textarea class="input-field" style="height: 100px; resize: none;" placeholder="The company launched its new product in Q1 2026..."></textarea>
+                <textarea class="input-field" id="factcheck-query" style="height: 100px; resize: none;" placeholder="The company launched its new product in Q1 2026..."></textarea>
               </div>
-              <button class="btn btn-primary mock-api-btn" style="width: 100%;" data-service="fact-checker" data-action="verify">
-                Run Verification
+              <button class="btn btn-primary mock-api-btn" style="width: 100%;" data-service="fact-checker" data-action="verify" data-stream="true">
+                Run Live Verification (Streaming)
               </button>
             </div>
             <div class="service-output">
@@ -308,8 +327,8 @@
                   </div>
                   <div class="terminal-title">Verification Results</div>
                 </div>
-                <div class="terminal-body">
-                  <div class="terminal-line"><span class="terminal-prompt">&gt;</span> Fact checker ready. Provide claim for verification.</div>
+                <div class="terminal-body" id="factcheck-terminal">
+                  <div class="terminal-line"><span class="terminal-prompt">&gt;</span> Fact checker ready. Enter your API key and claim to begin.</div>
                 </div>
               </div>
             </div>

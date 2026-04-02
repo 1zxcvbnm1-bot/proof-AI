@@ -70,34 +70,114 @@ document.addEventListener('DOMContentLoaded', () => {
     terminalBody.scrollTop = terminalBody.scrollHeight;
   }
 
-  // Simple mock API call logic
-  document.querySelectorAll('.mock-api-btn').forEach(btn => {
-    btn.addEventListener('click', (e) => {
+  // Real API call for Fact Checker
+  const factCheckBtn = document.querySelector('.mock-api-btn[data-service="fact-checker"]');
+  if (factCheckBtn) {
+    factCheckBtn.addEventListener('click', async (e) => {
       const targetTerminal = e.target.closest('.service-interface').querySelector('.terminal-body');
-      const action = e.target.getAttribute('data-action');
-      const service = e.target.getAttribute('data-service');
-      
-      addTerminalLine(targetTerminal, `Initializing request to /v1/${service}/${action}...`, 'info');
-      
-      setTimeout(() => {
-        addTerminalLine(targetTerminal, `Status: 200 OK`, 'info');
-        addTerminalLine(targetTerminal, `Response Object Generated.`, 'info');
-        
-        let mockResponse = '';
-        if (service === 'rag') {
-            mockResponse = '{\n  "context_retrieved": 5,\n  "sources": ["doc_1", "doc_3"],\n  "confidence": 0.94\n}';
-        } else if (service === 'fact-checker') {
-            mockResponse = '{\n  "status": "verified",\n  "truth_score": 0.98,\n  "hallucination_detected": false\n}';
-        } else if (service === 'agent-loop') {
-            mockResponse = '{\n  "status": "running",\n  "current_phase": "execution",\n  "tools_used": ["search"]\n}';
-        } else {
-            mockResponse = '{\n  "status": "success"\n}';
+      const terminalBody = document.getElementById('factcheck-terminal') || targetTerminal;
+
+      // Clear terminal
+      terminalBody.innerHTML = '';
+
+      // Get user inputs
+      const provider = document.getElementById('factcheck-provider')?.value || 'groq';
+      const apiKey = document.getElementById('factcheck-apikey')?.value?.trim();
+      const model = document.getElementById('factcheck-model')?.value?.trim() || undefined;
+      const query = document.getElementById('factcheck-query')?.value?.trim();
+
+      if (!apiKey) {
+        addTerminalLine(terminalBody, '❌ Error: Please enter your API key', 'error');
+        return;
+      }
+      if (!query) {
+        addTerminalLine(terminalBody, '❌ Error: Please enter a claim to verify', 'error');
+        return;
+      }
+
+      addTerminalLine(terminalBody, `🔍 Initializing PROOF-AI fact-check...`, 'info');
+      addTerminalLine(terminalBody, `   Provider: ${provider}`, 'info');
+      if (model) addTerminalLine(terminalBody, `   Model: ${model}`, 'info');
+
+      try {
+        const response = await fetch('/api/fact-check', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            api_key: apiKey,
+            provider: provider,
+            model: model,
+            query: query,
+            stream: true
+          })
+        });
+
+        if (!response.ok) {
+          const err = await response.json().catch(() => ({ detail: 'Unknown error' }));
+          throw new Error(err.detail || `HTTP ${response.status}`);
         }
-        
-        addTerminalLine(targetTerminal, `<pre style="font-family:inherit;margin-top:5px;opacity:0.8">${mockResponse}</pre>`, 'info');
-      }, 800);
+
+        addTerminalLine(terminalBody, `✅ Connected. Streaming verdicts...`, 'info');
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split('\n\n');
+          buffer = lines.pop(); // Keep incomplete line in buffer
+
+          for (const line of lines) {
+            if (line.startsWith('data: ')) {
+              try {
+                const data = JSON.parse(line.slice(6));
+
+                if (data.event === 'error') {
+                  addTerminalLine(terminalBody, `❌ Error: ${data.message}`, 'error');
+                  break;
+                }
+
+                if (data.event === 'claims_extracted') {
+                  addTerminalLine(terminalBody, `   Extracted ${data.count} claim(s)`, 'info');
+                }
+
+                if (data.event === 'verdict') {
+                  const icon = data.verdict === 'VERIFIED' ? '✅' :
+                              data.verdict === 'BLOCKED' ? '🚫' :
+                              data.verdict === 'CONFLICT' ? '⚡' : '⚠️';
+                  addTerminalLine(terminalBody, `\n${icon} [${data.verdict}] conf: ${data.confidence.toFixed(2)}`, 'info');
+                  addTerminalLine(terminalBody, `   Claim: ${data.claim.substring(0, 80)}${data.claim.length > 80 ? '...' : ''}`, 'info');
+                  addTerminalLine(terminalBody, `   Hallucination: ${data.halluc_type}`, 'info');
+                  if (data.explanation) {
+                    addTerminalLine(terminalBody, `   ↳ ${data.explanation}`, 'info');
+                  }
+                }
+
+                if (data.event === 'complete') {
+                  addTerminalLine(terminalBody, `\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`, 'info');
+                  addTerminalLine(terminalBody, `📊 Summary: ${data.verified} verified, ${data.blocked} blocked, ${data.conflicts} conflicts`, 'info');
+                  addTerminalLine(terminalBody, `   Hallucination rate: ${(data.halluc_rate * 100).toFixed(1)}%`, 'info');
+                  addTerminalLine(terminalBody, `   Types: ${data.halluc_types.join(', ') || 'none'}`, 'info');
+                  addTerminalLine(terminalBody, `   Latency: ${data.latency_ms.toFixed(1)}ms`, 'info');
+                  addTerminalLine(terminalBody, `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`, 'info');
+                }
+              } catch (parseErr) {
+                console.error('Parse error:', parseErr, line);
+              }
+            }
+          }
+        }
+
+      } catch (err) {
+        addTerminalLine(terminalBody, `❌ Request failed: ${err.message}`, 'error');
+        addTerminalLine(terminalBody, `   Check your API key and try again.`, 'error');
+      }
     });
-  });
+  }
 
   // Copy API Key Functionality
   document.querySelectorAll('.copy-btn').forEach(btn => {

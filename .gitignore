@@ -29,6 +29,9 @@ logs/
 ehthumbs.db
 Thumbs.db
 
+# Claude local settings
+.claude/
+
 # Others
 demo_output.txt
 .pytest_cache/

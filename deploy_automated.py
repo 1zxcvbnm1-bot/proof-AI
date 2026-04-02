@@ -146,7 +146,18 @@ def push_to_github():
     """Push to origin/main."""
     log("Pushing to GitHub...")
     try:
-        run_cmd("git push origin main", timeout=300)
+        # Use Popen to handle timeout manually if needed
+        result = subprocess.run(
+            "git push origin main",
+            shell=True,
+            capture_output=True,
+            text=True,
+            cwd=Path(__file__).parent,
+            timeout=300
+        )
+        if result.returncode != 0:
+            log(f"Git push failed: {result.stderr}", "ERROR")
+            return False
         log("Successfully pushed to GitHub", "SUCCESS")
         return True
     except subprocess.TimeoutExpired:
@@ -173,7 +184,7 @@ def verify_github_deploy():
 def create_deployment_checklist():
     """Create a checklist for manual Render deployment."""
     checklist = f"""
-# 🚀 RENDER DEPLOYMENT CHECKLIST
+# RENDER DEPLOYMENT CHECKLIST
 
 ## automated with /debug
 
@@ -187,7 +198,7 @@ def create_deployment_checklist():
 ### manual steps (you do this in browser):
 
 1. go to https://render.com/dashboard
-2. click "new +" → "web service"
+2. click "new +" -> "web service"
 3. connect github repo: proof-ai
 4. configure:
    name: {RENDER_SERVICE_NAME}
@@ -210,7 +221,7 @@ def create_deployment_checklist():
 - [ ] start yc application
 
 ### common issues:
-- build fails: missing deps → add to requirements.txt
+- build fails: missing deps -> add to requirements.txt
 - static files 404: ensure Website/ is in git
 - first request slow: free tier sleeps (normal)
 - import errors: check render logs for missing packages

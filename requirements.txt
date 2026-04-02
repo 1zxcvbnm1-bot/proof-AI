@@ -1,16 +1,13 @@
-# ── PROOF-AI Demo — Minimal Production Dependencies ───────────────────────────
-# Core Web Framework (from demo_server_requirements.txt)
+# ── PROOF-AI Demo — Production Dependencies ───────────────────────────────
+# Core Web Framework
 fastapi>=0.115.0
 uvicorn[standard]>=0.32.0
+gunicorn>=21.2.0
 pydantic>=2.9.0
 
 # Core AI/LLM Integration (required by fact_checker.py)
 litellm>=1.45.0
 numpy>=1.26.0
-sentence-transformers>=3.1.0
 
-# Optional: Google AI provider support
-google-genai>=1.0.0
-
-# Note: Other modules (Privacy_vault, RAG engine) have their own dependencies
-# This minimal set is sufficient for the fact-checking demo to run.
+# Note: sentence-transformers is NOT needed at runtime.
+# The NLI verifier uses LLM-based proxy, not local CrossEncoder.

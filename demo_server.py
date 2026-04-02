@@ -279,16 +279,23 @@ async def root():
     return HTMLResponse("<h1>PROOF-AI Demo — Website files not found</h1>")
 
 
-# Mount static files
-app.mount("/css", StaticFiles(directory=os.path.join(BASE_DIR, "Website", "css")), name="css")
-app.mount("/js", StaticFiles(directory=os.path.join(BASE_DIR, "Website", "js")), name="js")
+# Mount static files (guarded — directories may not exist on some deployments)
+_css_dir = os.path.join(BASE_DIR, "Website", "css")
+_js_dir = os.path.join(BASE_DIR, "Website", "js")
+if os.path.isdir(_css_dir):
+    app.mount("/css", StaticFiles(directory=_css_dir), name="css")
+else:
+    print(f"[DemoServer] WARNING: CSS dir not found at {_css_dir}")
+if os.path.isdir(_js_dir):
+    app.mount("/js", StaticFiles(directory=_js_dir), name="js")
+else:
+    print(f"[DemoServer] WARNING: JS dir not found at {_js_dir}")
 
 
 # ─────────────────────────────────────────────────────────────────────────────
 
 if __name__ == "__main__":
     import uvicorn
-    # Render compatibility: use PORT env var if provided, else 8080
     port = int(os.environ.get('PORT', 8080))
     print("=" * 70)
     print("  PROOF-AI LIVE DEMO SERVER")
@@ -298,5 +305,4 @@ if __name__ == "__main__":
     status = "Available" if PROOF_AI_AVAILABLE else "Not found"
     print(f"  PROOF-AI modules: {status}")
     print("=" * 70)
-
     uvicorn.run(app, host="0.0.0.0", port=port)

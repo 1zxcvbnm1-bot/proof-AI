@@ -1,9 +1,9 @@
 services:
   - type: web
     name: proof-ai-demo
-    env: python
+    runtime: python
     buildCommand: "pip install -r requirements.txt"
-    startCommand: "python demo_server.py"
+    startCommand: "gunicorn demo_server:app --workers 2 --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:$PORT"
     envVars:
       - key: PYTHON_VERSION
-        value: 3.11.0
+        value: "3.11.0"
